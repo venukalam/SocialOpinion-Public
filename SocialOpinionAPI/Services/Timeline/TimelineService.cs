@@ -65,6 +65,7 @@ namespace SocialOpinionAPI.Services.Timeline
                 cfg.CreateMap<DTO.Timeline.Entities, Models.Timeline.Entities>();
                 cfg.CreateMap<DTO.Timeline.Error, Models.Timeline.Error>();
 
+                cfg.CreateMap<UserReverseChronologicalTimelineDTO, UserReverseChronologicalTimelineModel>();
             });
 
             _iMapper = config.CreateMapper();
@@ -120,6 +121,27 @@ namespace SocialOpinionAPI.Services.Timeline
             UserMentionedTimelineDTO timelineDTO = JsonConvert.DeserializeObject<UserMentionedTimelineDTO>(results);
 
             UserMentionedTimelineModel model = _iMapper.Map<UserMentionedTimelineDTO, UserMentionedTimelineModel>(timelineDTO);
+
+            return model;
+
+        }
+
+        public UserReverseChronologicalTimelineModel GetReverseChronologicalTimeline(string id, DateTime? endtime, int maxResults, string pagination_token, DateTime? startTime, string since_id, string until_id)
+        {
+            TimelineClient client = new TimelineClient(_oAuthInfo);
+
+            if (_includePrivateMetrics == false)
+            {
+                _TweetFields = _TweetFields.Replace("non_public_metrics,", "");
+                _TweetFields = _TweetFields.Replace("organic_metrics,", "");
+            }
+
+            string results = client.GetReverseChronologicalTimeline(id, endtime, _expansionsFields, maxResults, _MediaFields, pagination_token,
+                                                         _PlaceFields, _PollFields, since_id, startTime, _TweetFields, until_id, _UserFields);
+
+            UserReverseChronologicalTimelineDTO timelineDTO = JsonConvert.DeserializeObject<UserReverseChronologicalTimelineDTO>(results);
+
+            UserReverseChronologicalTimelineModel model = _iMapper.Map<UserReverseChronologicalTimelineDTO, UserReverseChronologicalTimelineModel>(timelineDTO);
 
             return model;
 
